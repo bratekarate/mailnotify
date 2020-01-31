@@ -1,0 +1,69 @@
+#!/bin/sh
+
+# Copyright (c) 2019, Felix Jian
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Usage: mailnotify <SUBDIR_TO_WATCH> <SUBDIR_TO_EXCLUDE_1> <SUBDIR_TO_EXCLUDE_2> ...
+
+# TODO: print usage
+# TODO: use options like `--exclude-dirs` instead of one arg array
+
+LISTEN_DIR=$1
+shift
+EXCLUDE="$1"
+shift
+
+for i in "$@"; do
+    EXCLUDE="$EXCLUDE,$i"
+done
+
+EXCLUDE_ROOT=$(echo $LISTEN_DIR | awk -F '/' '{ gsub("\\.", "\\.", $3); print $3 }')
+EXCLUDE=$(echo $EXCLUDE | sed 's/,/)|(/g; s/^/(/g; s/$/)/g; s/\(\w\)\()\)/\1\/.*\2/g')
+
+#echo -e "\nEXCLUDE_ROOT: $EXCLUDE_ROOT" # uncomment to show exclude pattern root
+
+while LINE=$(inotifywait -qr -e moved_to -e create --exclude "/$EXCLUDE_ROOT/.*/($EXCLUDE|(\.|tmp|cur))" --format %w%f $LISTEN_DIR)
+do
+    #echo $LINE # uncomment to show path of triggered event
+
+    # TODO: try extracting necessary data with only one awk command (store matches in variables and print after processing using `END`. Then maybe pipe to while and read, e.g. 
+    #   ```
+    #   awk '{ ... END { print var_to " " var_from " " ... } }' | while read TO FROM...; do
+    #       echo $TO
+    #       echo $FROM
+    #       # do stuff with $TO and $FROM ...
+    #   done
+    #   ```
+
+    EMAIL=$(cat "$LINE")
+    TO=$(echo "$EMAIL" | awk -F ': ' '$1 == "To" {print $2}')
+    
+    # Escape < and > just after `TO`is extracted, as `TO` will be printed in notification title where escaping is not appropriate.
+
+    EMAIL=$(echo "$EMAIL" | awk '{gsub(/</, "\\&lt;"); gsub(/>/, "\\&gt;"); print}')
+    FROM=$(echo "$EMAIL" | awk -F ': ' '$1 == "From" {print $2}')
+    SUBJECT=$(echo "$EMAIL" | awk -F ': ' '$1 == "Subject" {print $2}')
+    PRIORITY=$(echo "$EMAIL" | awk -F ': ' '$1 == "X-Priority" {print $2}')
+    PRIORITY=${PRIORITY:-3}
+            
+    TITLE="MAIL: $TO"
+    BODY="From: $FROM\n\n$SUBJECT"
+
+    if [ "$PRIORITY" -eq 1 ]; then
+        notify-send -u CRITICAL "$TITLE" "$BODY"
+    else
+        notify-send "$TITLE" "$BODY"
+    fi
+done
