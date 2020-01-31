@@ -34,7 +34,7 @@ EXCLUDE=$(echo $EXCLUDE | sed 's/,/)|(/g; s/^/(/g; s/$/)/g; s/\(\w\)\()\)/\1\/.*
 
 #echo -e "\nEXCLUDE_ROOT: $EXCLUDE_ROOT" # uncomment to show exclude pattern root
 
-while LINE=$(inotifywait -qr -e moved_to -e create --exclude "/$EXCLUDE_ROOT/.*/($EXCLUDE|(\.|tmp|cur))" --format %w%f $LISTEN_DIR)
+while LINE=$(inotifywait -qr -e moved_to -e create --exclude "/$EXCLUDE_ROOT/.*/($EXCLUDE|(\.|new|cur))" --format %w%f $LISTEN_DIR)
 do
     #echo $LINE # uncomment to show path of triggered event
 
