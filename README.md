@@ -1,5 +1,5 @@
 # mailnotify
-Fire notifications for when new emails are found in your offline folders. 
+Fire notifications when new emails are found in your offline mail folders. 
 
 Dependencies: `inotifywait`
 
