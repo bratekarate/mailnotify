@@ -6,7 +6,7 @@ Dependencies: `inotifywait`, `notify-send`
 Should be POSIX compliant and work in most shells (tested in `dash`)
 
 ## Installation
-Copy or symlink to bin folder of your choice
+Copy or symlink all sh scripts to bin folder of your choice (names must be kept the same).
 
 ## Usage
 `mailnotify <DIR_TO_WATCH> <SUBDIR_TO_EXCLUDE_1> <SUBDIR_TO_EXCLUDE_2> ...`
