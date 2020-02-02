@@ -1,0 +1,30 @@
+#!/bin/sh
+
+RESULT_ARR="$(sed 's/\t/ /g' "$1" |  # replace tabs with whitespaces first 
+
+    # line 1: Replace first colon by tab to split into columns by first 
+    #   delimiter.
+    # line 3: Escape < and > just after `To`is extracted, as `To` will be 
+    #   printed in notification title where escaping is not appropriate.
+    # line 7: Return tab-separated result.
+
+    awk -v d="'" -F '\t' '
+{ sub(/: /, "\t") }
+$1 == "To" { to = $2 }
+{ gsub(/</, "\\&lt;"); gsub(/>/, "\\&gt;")}
+$1 == "From" { from = $2 }
+$1 == "Subject" { subject = $2 }
+$1 == "X-Priority" { priority = $2 }
+END { print to "\t" from "\t" subject "\t" priority }
+')"
+
+echo "$RESULT_ARR"
+
+echo "$RESULT_ARR" | 
+    while IFS="$(printf '\t')" read -r TO FROM SUBJECT PRIORITY; do
+        TITLE="MAIL: $TO"
+        BODY="From: $FROM\n\n$SUBJECT"
+
+        "$2" "$TITLE" "$BODY" "${PRIORITY:-3}" 
+    done
+

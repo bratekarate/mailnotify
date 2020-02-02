@@ -1,0 +1,12 @@
+#!/bin/sh
+
+# TODO: print usage
+# TODO: use options like `--priority` and `--body` and choose 1 main argument
+# (e.g. `From`) 
+
+if [ "$3" -eq 1 ]; then
+    notify-send -u CRITICAL "$1" "$2"
+else
+    notify-send "$1" "$2"
+fi
+
