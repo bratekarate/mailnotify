@@ -1,5 +1,9 @@
 #!/bin/sh
 
+# TODO: print usage
+# TODO: use options like `--command` and choose 1 main argument
+# (e.g. `mail path`, default to echo) 
+
 RESULT_ARR="$(sed 's/\t/ /g' "$1" |  # replace tabs with whitespaces first 
 
     # line 1: Replace first colon by tab to split into columns by first 
@@ -22,9 +26,6 @@ echo "$RESULT_ARR"
 
 echo "$RESULT_ARR" | 
     while IFS="$(printf '\t')" read -r TO FROM SUBJECT PRIORITY; do
-        TITLE="MAIL: $TO"
-        BODY="From: $FROM\n\n$SUBJECT"
-
-        "$2" "$TITLE" "$BODY" "${PRIORITY:-3}" 
+        "$2" "$TO" "$FROM" "$SUBJECT" "${PRIORITY:-3}" 
     done
 
