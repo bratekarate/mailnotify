@@ -3,6 +3,10 @@
 # TODO: print usage
 # TODO: use options like `--exclude-dirs` instead of one arg array
 
+
+# Usage: 
+# `mailnotify <DIR_TO_WATCH> <DIR_TO_EXCLUDE_1> <DIR_TO_EXCLUDE_2> ... <DIR_TO_EXCLUDE_N>`
+
 LISTEN_DIR=$1
 shift
 EXCLUDE="$1"
