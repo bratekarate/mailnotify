@@ -4,6 +4,10 @@
 # TODO: use options like `--title` and `--body` and choose 1 main argument
 # (e.g. `to`) 
 
+# Usage: 
+# `notify-newmail <MAIL_TO> <MAIL_FROM> <MAIL_SUBJECT> <MAIL_PRIORITY>`
+# <MAIL_PRIORITY> value of 1 will be translated to CRITICAL urgency. 
+# Values from 2-5 are ignored.
 
 TITLE="MAIL: $1"
 BODY="From: $2\n\n$3"

@@ -2,16 +2,19 @@
 
 # TODO: print usage
 # TODO: use options like `--command` and choose 1 main argument
-# (e.g. `mail path`, default to echo) 
+# (e.g. `mail path`, default to echo)
 
-RESULT_ARR="$(sed 's/\t/ /g' "$1" |  # replace tabs with whitespaces first 
+# Usage: 
+# `parsemail-exec <PATH_TO_MAIL_FILE> <PROGRAMM_TO_EXEC>`
+# <PROGRAMM_TO_EXEC> will be called with parameters $TO $FROM $SUBJECT and $PRIORITY 
 
-    # line 1: Replace first colon by tab to split into columns by first 
-    #   delimiter.
-    # line 3: Escape < and > just after `To`is extracted, as `To` will be 
+RESULT_ARR="$(sed 's/\t/ /g' "$1" |  # replace tabs with whitespaces first
+
+    # line 1: Replace first colon by tab to split into 2 columns by first
+    #   colon.
+    # line 3: Escape < and > just after `To`is extracted, as `To` will be
     #   printed in notification title where escaping is not appropriate.
     # line 7: Return tab-separated result.
-
     awk -v d="'" -F '\t' '
 { sub(/: /, "\t") }
 $1 == "To" { to = $2 }
