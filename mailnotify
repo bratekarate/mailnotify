@@ -3,30 +3,37 @@
 # TODO: print usage
 # TODO: use options like `--exclude-dirs` instead of one arg array
 
-
 # Usage: 
 # `mailnotify <DIR_TO_WATCH> <DIR_TO_EXCLUDE_1> <DIR_TO_EXCLUDE_2> ... <DIR_TO_EXCLUDE_N>`
 
 LISTEN_DIR=$1
 shift
-EXCLUDE="$1"
-shift
 
-for i in "$@"; do
-    EXCLUDE="$EXCLUDE,$i"
-done
+echo "[$(date +"%Y-%m-%d %H:%M:%S")] \
+Listening for new email files in $LISTEN_DIR"; echo
 
+[ $# -eq 0 ] || echo "Excluding subdirectories:"
+echo "$(printf '"%s"  ' "$@")"; echo
+
+EXCLUDE="$(printf '%s)|(' "$@")"
+EXCLUDE=$(echo ${EXCLUDE%???} |
+    sed 's/^/(/g; s/$/)/g; s/\(\w\)\()\)/\1\/.*\2/g')
 EXCLUDE_ROOT=$(echo $LISTEN_DIR | 
     awk -F '/' '{ gsub("\\.", "\\.", $3); print $3 }')
-EXCLUDE=$(echo $EXCLUDE | 
-    sed 's/,/)|(/g; s/^/(/g; s/$/)/g; s/\(\w\)\()\)/\1\/.*\2/g')
-
-#echo -e "\nEXCLUDE_ROOT: $EXCLUDE_ROOT" # uncomment to echo pattern root
 
 while LINE=$(inotifywait -qr -e moved_to -e create \
 --exclude "/$EXCLUDE_ROOT/.*/($EXCLUDE|(\.|new|cur))" \
 --format %w%f $LISTEN_DIR)
-do 
-    echo [$(date +"%Y-%m-%d %H:%M:%S")] $LINE
-    parsemail-exec "$LINE" "$(which notify-newmail)"
+do
+    echo [$(date +"%Y-%m-%d %H:%M:%S")] $LINE; echo
+
+    # check in both `tmp` and `new`. Normally mail should be in `new`
+    if test -f "$LINE"; then
+        MAIL_PATH="$LINE"
+    else 
+        MAIL_PATH="$(echo "$LINE" | sed 's/tmp/new/g')" 
+    fi
+    test -f "$MAIL_PATH" || exit 0
+
+    parsemail-exec "$MAIL_PATH" "$(which notify-newmail)"
 done
