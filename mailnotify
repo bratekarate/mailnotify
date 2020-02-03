@@ -22,7 +22,7 @@ EXCLUDE=$(echo $EXCLUDE |
 while LINE=$(inotifywait -qr -e moved_to -e create \
 --exclude "/$EXCLUDE_ROOT/.*/($EXCLUDE|(\.|new|cur))" \
 --format %w%f $LISTEN_DIR)
-do
-    #echo $LINE # uncomment to show path of triggered event
+do 
+    echo [$(date +"%Y-%m-%d %H:%M:%S")] $LINE
     parsemail-exec "$LINE" "$(which notify-newmail)"
 done
