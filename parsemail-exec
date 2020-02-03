@@ -25,7 +25,7 @@ $1 == "X-Priority" { priority = $2 }
 END { print to "\t" from "\t" subject "\t" priority }
 ')"
 
-echo "$RESULT_ARR"
+#echo "$RESULT_ARR" # uncomment to log parsed input delimited by tabs
 
 echo "$RESULT_ARR" | 
     while IFS="$(printf '\t')" read -r TO FROM SUBJECT PRIORITY; do
