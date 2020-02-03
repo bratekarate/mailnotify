@@ -9,7 +9,6 @@
 # <PROGRAMM_TO_EXEC> will be called with parameters $TO $FROM $SUBJECT and $PRIORITY 
 
 RESULT_ARR="$(sed 's/\t/ /g' "$1" |  # replace tabs with whitespaces first
-
     # line 1: Replace first colon by tab to split into 2 columns by first
     #   colon.
     # line 3: Escape < and > just after `To`is extracted, as `To` will be
