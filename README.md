@@ -37,4 +37,4 @@ To run mailnotify as a systemd service, the executable `mailnotify-run` is used.
 
 First create a shell script named `mailnotify-run`. The unit file's `ExecStart` expects the binaries to sit at `~/.local/bin`, so change accordingly if necessary. Also, if the path to the binaries is not in the unit files' `Environment` option, the path must be added there as well.
 
-copy or symlink `mailnotify.service` to `~/.config/systemd/user/` and run `systemctl --user enable mailnotify.service && systemctl --user start mailnotify.service`. 
+Copy or symlink `mailnotify.service` to `~/.config/systemd/user/` and run `systemctl --user enable mailnotify.service && systemctl --user start mailnotify.service`. 
