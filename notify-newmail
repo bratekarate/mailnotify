@@ -11,7 +11,7 @@
 
 TITLE="MAIL: $1"
 BODY="$(echo "From: $2\n\n$3" | 
-    # Escape < and > only in notification body 
+    # Escape < and > only in notification body (TODO: any other escapes?) 
     awk -F '\t' '{ gsub(/</, "\\&lt;"); gsub(/>/, "\\&gt;"); print }')"
     
 echo $BODY
