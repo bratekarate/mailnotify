@@ -11,11 +11,17 @@ Copy or symlink all sh scripts to bin folder of your choice (names must be kept 
 ## Usage
 `mailnotify <DIR_TO_WATCH> <SUBDIR_TO_EXCLUDE_1> <SUBDIR_TO_EXCLUDE_2> ...`
 
-Directory that should be watched for new emails may hold multiple accounts. Specify one additional argument per subdirectory that should be excluded, e.g. "Trash", "Sent", "Read Later", etc.
+```
+mailnotify [OPTION]... [DIR_TO_WATCH]
 
-`Example: mailnotify ~/.local/share/mail Trash Sent 'Read Later'`
+    Options:
+      -e, --exclude-dir       Directory to exclude from watching. Mail files
+                              created in this directory will not trigger a
+                              notification. May be applied multiple times for
+                              multiple directories.
 
-## Known Issues
-As of now there is no mechanism to differentiate between newly arrived emails and those that have been moved to the `new` folder after being read before. So if `toggle-new` is called on old mails with `mutt` and `sync-mailbox` is called, a notification will be fired as well. 
+```
 
-Possible future fix: Only listen to `create` event with inotify, not `moved_to`. Figure out where new mails are initially created before moved to `new` folder (tmp folder? any side effects to this approach?).
+Directory that should be watched for new emails may hold multiple accounts. Specify one additional argument per subdirectory that should be excluded, e.g. for "Trash", "Sent", "Read Later", "[Gmail]/Sent Items" etc. The `[` Character (and possibly more) must be escaped.
+
+Example: `mailnotify --exclude-dir Trash --exclude-dir Sent --exclude-dir 'Read Later' '\[Gmail\]/Sent Items' ~/.local/share/mail`
