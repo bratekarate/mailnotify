@@ -9,8 +9,6 @@ Should be POSIX compliant and work in most shells (tested in `dash`)
 Copy or symlink all sh scripts to bin folder of your choice (names must be kept the same).
 
 ## Usage
-`mailnotify <DIR_TO_WATCH> <SUBDIR_TO_EXCLUDE_1> <SUBDIR_TO_EXCLUDE_2> ...`
-
 ```
 mailnotify [OPTION]... [DIR_TO_WATCH]
 
@@ -24,4 +22,5 @@ mailnotify [OPTION]... [DIR_TO_WATCH]
 
 Directory that should be watched for new emails may hold multiple accounts. Specify one additional argument per subdirectory that should be excluded, e.g. for "Trash", "Sent", "Read Later", "[Gmail]/Sent Items" etc. The `[` Character (and possibly more) must be escaped.
 
-Example: `mailnotify --exclude-dir Trash --exclude-dir Sent --exclude-dir 'Read Later' '\[Gmail\]/Sent Items' ~/.local/share/mail`
+## Example: 
+`mailnotify --exclude-dir Trash --exclude-dir Sent --exclude-dir 'Read Later' '\[Gmail\]/Sent Items' ~/.local/share/mail`
