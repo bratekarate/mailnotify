@@ -23,7 +23,12 @@ mailnotify [OPTION]... [DIR_TO_WATCH]
 Directory that should be watched for new emails may hold multiple email accounts. Specify one additional argument per subdirectory that should be excluded, e.g. for "Trash", "Sent", "Read Later", "[Gmail]/Sent Items" etc. The `[` Character (and possibly more) must be escaped.
 
 ## Example: 
-`mailnotify --exclude-dir Trash --exclude-dir Sent --exclude-dir 'Read Later' '\[Gmail\]/Sent Items' ~/.local/share/mail`
+`mailnotify \
+    -e Trash \ 
+    -e Sent \
+    -e 'Read Later' \
+    -e '\[Gmail\]/Sent Items' \
+    ~/.local/share/mail`
 
 ## Systemd unit
 To run mailnotify as a systemd service, copy or symlink `mailnotify.service` to `~/.config/systemd/user/` and run `systemctl --user enable mailnotify.service && systemctl --user start mailnotify.service`. 
