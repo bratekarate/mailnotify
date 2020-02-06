@@ -1,5 +1,7 @@
 #!/bin/sh
 
+WARNING_NO_MAIL_FILE="warning: could not find mail file after create event. Possibly newly downloaded mail that has been read already. Ignoring."
+
 print_usage() {
     echo 'Usage: mailnotify [OPTION]... [DIR_TO_WATCH]
 
@@ -14,6 +16,10 @@ print_usage() {
 malformed_args() {
     echo "$0: error: malformed arguments." >&2; echo
     print_usage
+}
+
+datetime_formatted() {
+    echo "[$(date +'%Y-%m-%d %H:%M:%S')]"
 }
 
 # Extract option arguments
@@ -43,8 +49,7 @@ done
 
 LISTEN_DIR="$1"
 
-echo "[$(date +'%Y-%m-%d %H:%M:%S')] \
-Listening for new email files in $LISTEN_DIR"; echo
+echo "$(datetime_formatted) Listening for new email files in $LISTEN_DIR"; echo
 
 # Store given dir names to exclude in positional parameter array
 eval "set -- "$EXCLUDE_INPUT""
@@ -66,7 +71,7 @@ while LINE="$(inotifywait -qr -e create \
 --exclude "/$EXCLUDE_ROOT/.*/($EXCLUDE|(\.|new|cur))" \
 --format %w%f "$LISTEN_DIR")"
 do
-    echo "[$(date +"%Y-%m-%d %H:%M:%S")] $LINE"; echo
+    echo "$(datetime_formatted) $LINE"; echo
 
     # Check in both `tmp` and `new`. In most cases, mail should be in `new`
     if test -f "$LINE"; then
@@ -76,7 +81,7 @@ do
     fi
 
     test -f "$MAIL_PATH" || {
-        echo "warning: could not find mail file after create event. Possibly newly downloaded mail that has been read already. Ignoring."
+        echo "$WARNING_NO_MAIL_FILE"
             continue
         }
 
@@ -85,3 +90,4 @@ do
             notify-newmail "$TO" "$FROM" "$SUBJECT" "${PRIORITY:-3}"
         done
 done
+
