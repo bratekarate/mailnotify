@@ -26,4 +26,5 @@ Directory that should be watched for new emails may hold multiple email accounts
 `mailnotify --exclude-dir Trash --exclude-dir Sent --exclude-dir 'Read Later' '\[Gmail\]/Sent Items' ~/.local/share/mail`
 
 ## Systemd unit
-To run mailnotify as a systemd service, copy or symlink `mailnotify.service` to `~/.config/systemd/user/` and run `systemctl --user enable mailnotify.service && systemctl --user start mailnotify.service`. The unit file expects the binaries to sit at ~/.local/bin, so change accordingly if necessary. If the path to the binaries is not in the specifided `Environment` value, the path must be added here as well.
+To run mailnotify as a systemd service, copy or symlink `mailnotify.service` to `~/.config/systemd/user/` and run `systemctl --user enable mailnotify.service && systemctl --user start mailnotify.service`. 
+The unit file expects the binaries to sit at `~/.local/bin`, so change accordingly if necessary. If the path to the binaries is not in the specifided `Environment` value, the path must be added here as well.
