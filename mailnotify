@@ -1,25 +1,25 @@
 #!/bin/sh
 
 print_usage() {
-    echo "Usage: mailnotify [OPTION]... [DIR_TO_WATCH]
+    echo 'Usage: mailnotify [OPTION]... [DIR_TO_WATCH]
 
     Options:
       -e, --exclude-dir       Directory to exclude from watching. Mail files
                               created in this directory will not trigger a
                               notification. May be applied multiple times for
                               multiple directories.
-    "
+    '
 }
 
 malformed_args() {
-    echo $0: error: malformed arguments. >&2; echo
+    echo "$0: error: malformed arguments." >&2; echo
     print_usage
 }
 
 while [ $# -gt 0 ]; do
     case $1 in
         -e|--exclude-dir)
-            EXCLUDE_INPUT="$EXCLUDE_INPUT $(printf "'%s'" $2)"
+            EXCLUDE_INPUT="$EXCLUDE_INPUT $(printf "'%s'" "$2")"
             shift
         ;;
 
@@ -31,49 +31,53 @@ while [ $# -gt 0 ]; do
         *)
             break
     esac
-
-    [ $# -gt 0 ] && shift
+    [ $# -gt 0 ] && shift # shift only if more parameters exist
 done
 
-! [ $# -eq 1 ] || echo $1 | grep "^-" && {
+! [ $# -eq 1 ] || echo "$1" | grep '^-' && {
+    # throw error if there is not exactly one parameter or it starts with "-"
     malformed_args
     exit 1
 }
 
-LISTEN_DIR=$1
+LISTEN_DIR="$1"
 
-echo "[$(date +"%Y-%m-%d %H:%M:%S")] \
+echo "[$(date +'%Y-%m-%d %H:%M:%S')] \
 Listening for new email files in $LISTEN_DIR"; echo
 
-eval set -- $EXCLUDE_INPUT
+# store given dir names to exclude in positional parameter array
+eval "set -- "$EXCLUDE_INPUT""
 
 ! [ $# -eq 0 ] && {
-    echo "Excluding subdirectories:"
-    echo $EXCLUDE_INPUT; echo;
+    echo 'Excluding subdirectories:'
+    echo "$EXCLUDE_INPUT"; echo;
 }
 
+# Format exclude pattern out of given dir names to exclude
 EXCLUDE="$(printf '%s)|(' "$@")"
-EXCLUDE=$(echo ${EXCLUDE%???} |
-    sed 's/^/(/g; s/$/)/g; s/\(\w\)\()\)/\1\/.*\2/g')
-EXCLUDE_ROOT=$(echo $LISTEN_DIR | 
-    awk -F '/' '{ gsub("\\.", "\\.", $3); print $3 }')
+EXCLUDE="$(echo "${EXCLUDE%???}" |
+    sed 's/^/(/g; s/$/)/g; s/\(\w\)\()\)/\1\/.*\2/g')"
 
-while LINE=$(inotifywait -qr -e create \
+EXCLUDE_ROOT="$(echo "$LISTEN_DIR" |
+    awk -F '/' '{ gsub("\\.", "\\.", $3); print $3 }')"
+
+while LINE="$(inotifywait -qr -e create \
 --exclude "/$EXCLUDE_ROOT/.*/($EXCLUDE|(\.|new|cur))" \
---format %w%f $LISTEN_DIR)
+--format %w%f "$LISTEN_DIR")"
 do
-    echo [$(date +"%Y-%m-%d %H:%M:%S")] $LINE; echo
+    echo "[$(date +"%Y-%m-%d %H:%M:%S")] $LINE"; echo
 
-    # check in both `tmp` and `new`. Normally mail should be in `new`
+    # check in both `tmp` and `new`. In most cases, mail should be in `new`
     if test -f "$LINE"; then
         MAIL_PATH="$LINE"
     else 
         MAIL_PATH="$(echo "$LINE" | sed 's/tmp/new/g')" 
     fi
+
     test -f "$MAIL_PATH" || exit 0
 
-    parsemail "$MAIL_PATH" | while IFS="$(printf '\t')" \
-        read -r TO FROM SUBJECT PRIORITY;do
+    parsemail "$MAIL_PATH" |
+        while IFS="$(printf '\t')" read -r TO FROM SUBJECT PRIORITY; do
             notify-newmail "$TO" "$FROM" "$SUBJECT" "${PRIORITY:-3}"
         done
 done
