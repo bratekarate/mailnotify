@@ -74,7 +74,10 @@ do
         MAIL_PATH="$(echo "$LINE" | sed 's/tmp/new/g')" 
     fi
 
-    test -f "$MAIL_PATH" || exit 0
+    test -f "$MAIL_PATH" || {
+        echo "warning: could not find mail file after create event. Ignoring."
+        continue
+    }
 
     parsemail "$MAIL_PATH" |
         while IFS="$(printf '\t')" read -r TO FROM SUBJECT PRIORITY; do
