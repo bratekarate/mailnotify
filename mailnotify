@@ -35,5 +35,8 @@ do
     fi
     test -f "$MAIL_PATH" || exit 0
 
-    parsemail-exec "$MAIL_PATH" "$(which notify-newmail)"
+    parsemail "$MAIL_PATH" | while IFS="$(printf '\t')" \
+        read -r TO FROM SUBJECT PRIORITY;do
+            notify-newmail "$TO" "$FROM" "$SUBJECT" "${PRIORITY:-3}"
+        done
 done

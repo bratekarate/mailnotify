@@ -10,11 +10,13 @@
 # Values from 2-5 are ignored.
 
 TITLE="MAIL: $1"
-BODY="From: $2\n\n$3"
-
+BODY="$(echo "From: $2\n\n$3" | 
+    # Escape < and > only in notification body 
+    awk -F '\t' '{ gsub(/</, "\\&lt;"); gsub(/>/, "\\&gt;"); print }')"
+    
+echo $BODY
 if [ "$4" -eq 1 ]; then
     notify-send -u CRITICAL "$TITLE" "$BODY"
 else
     notify-send "$TITLE" "$BODY"
 fi
-
