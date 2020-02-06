@@ -1,0 +1,12 @@
+[Unit]
+Description=Fire notifications when new emails are found in your offline mailboxes. 
+
+[Service]
+#EnvironmentFile=-/etc/mailnotify/env
+#EnvironmentFile=-%h/.mailnotify/env
+#EnvironmentFile=%h/.config/mailnotify/env
+Environment=PATH=/usr/local/bin:/usr/bin:%h/.local/bin:%h/bin
+ExecStart=%h/.local/bin/mailnotify-run
+
+[Install]
+WantedBy=default.target
