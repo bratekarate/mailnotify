@@ -75,9 +75,9 @@ do
     fi
 
     test -f "$MAIL_PATH" || {
-        echo "warning: could not find mail file after create event. Ignoring."
-        continue
-    }
+        echo "warning: could not find mail file after create event. Possibly newly downloaded mail that has been read already. Ignoring."
+            continue
+        }
 
     parsemail "$MAIL_PATH" |
         while IFS="$(printf '\t')" read -r TO FROM SUBJECT PRIORITY; do
