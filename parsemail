@@ -4,7 +4,7 @@
 # TODO: read from stdin for pipe usage
 
 # Usage: 
-# `parsemail <PATH_TO_MAIL_FILE>
+# `parsemail [PATH_TO_MAIL_FILE]
 # Returns tab-separated result in following order: 
 #   TO, FROM, SUBJECT, PRIORITY
 
