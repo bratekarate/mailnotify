@@ -16,6 +16,7 @@ malformed_args() {
     print_usage
 }
 
+# Extract option arguments
 while [ $# -gt 0 ]; do
     case $1 in
         -e|--exclude-dir)
@@ -35,7 +36,7 @@ while [ $# -gt 0 ]; do
 done
 
 ! [ $# -eq 1 ] || echo "$1" | grep '^-' && {
-    # throw error if there is not exactly one parameter or it starts with "-"
+    # Error if there is not exactly one parameter or if it starts with "-"
     malformed_args
     exit 1
 }
@@ -45,7 +46,7 @@ LISTEN_DIR="$1"
 echo "[$(date +'%Y-%m-%d %H:%M:%S')] \
 Listening for new email files in $LISTEN_DIR"; echo
 
-# store given dir names to exclude in positional parameter array
+# Store given dir names to exclude in positional parameter array
 eval "set -- "$EXCLUDE_INPUT""
 
 ! [ $# -eq 0 ] && {
@@ -67,7 +68,7 @@ while LINE="$(inotifywait -qr -e create \
 do
     echo "[$(date +"%Y-%m-%d %H:%M:%S")] $LINE"; echo
 
-    # check in both `tmp` and `new`. In most cases, mail should be in `new`
+    # Check in both `tmp` and `new`. In most cases, mail should be in `new`
     if test -f "$LINE"; then
         MAIL_PATH="$LINE"
     else 
