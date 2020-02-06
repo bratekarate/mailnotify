@@ -31,11 +31,8 @@ while [ $# -gt 0 ]; do
         *)
             break
     esac
-    [ $# -eq 0 ] && {
-        malformed_args
-        exit 1
-    }
-    shift
+
+    [ $# -gt 0 ] && shift
 done
 
 ! [ $# -eq 1 ] || echo $1 | grep "^-" && {
