@@ -1,19 +1,59 @@
 #!/bin/sh
 
-# TODO: print usage
-# TODO: use options like `--exclude-dirs` instead of one arg array
+print_usage() {
+    echo "Usage: mailnotify [OPTION]... [DIR_TO_WATCH]
 
-# Usage: 
-# `mailnotify <DIR_TO_WATCH> <DIR_TO_EXCLUDE_1> <DIR_TO_EXCLUDE_2> ... <DIR_TO_EXCLUDE_N>`
+    Options:
+      -e, --exclude-dir       Directory to exclude from watching. Mail files
+                              created in this directory will not trigger a
+                              notification. May be applied multiple times for
+                              multiple directories.
+    "
+}
+
+malformed_args() {
+    echo $0: error: malformed arguments. >&2; echo
+    print_usage
+}
+
+while [ $# -gt 0 ]; do
+    case $1 in
+        -e|--exclude-dir)
+            EXCLUDE_INPUT="$EXCLUDE_INPUT $(printf "'%s'" $2)"
+            shift
+        ;;
+
+        -h|--help)
+            print_usage
+            exit
+        ;;
+
+        *)
+            break
+    esac
+    [ $# -eq 0 ] && {
+        malformed_args
+        exit 1
+    }
+    shift
+done
+
+! [ $# -eq 1 ] || echo $1 | grep "^-" && {
+    malformed_args
+    exit 1
+}
 
 LISTEN_DIR=$1
-shift
 
 echo "[$(date +"%Y-%m-%d %H:%M:%S")] \
 Listening for new email files in $LISTEN_DIR"; echo
 
-[ $# -eq 0 ] || echo "Excluding subdirectories:"
-echo "$(printf '"%s"  ' "$@")"; echo
+eval set -- $EXCLUDE_INPUT
+
+! [ $# -eq 0 ] && {
+    echo "Excluding subdirectories:"
+    echo $EXCLUDE_INPUT; echo;
+}
 
 EXCLUDE="$(printf '%s)|(' "$@")"
 EXCLUDE=$(echo ${EXCLUDE%???} |
@@ -21,7 +61,7 @@ EXCLUDE=$(echo ${EXCLUDE%???} |
 EXCLUDE_ROOT=$(echo $LISTEN_DIR | 
     awk -F '/' '{ gsub("\\.", "\\.", $3); print $3 }')
 
-while LINE=$(inotifywait -qr -e moved_to -e create \
+while LINE=$(inotifywait -qr -e create \
 --exclude "/$EXCLUDE_ROOT/.*/($EXCLUDE|(\.|new|cur))" \
 --format %w%f $LISTEN_DIR)
 do
