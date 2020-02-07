@@ -6,7 +6,9 @@ Dependencies: [`inotify-tools`](https://github.com/inotify-tools/inotify-tools)(
 Should be POSIX compliant and work in most shells (tested in `dash`)
 
 ## Installation
-Copy or symlink all sh scripts to bin folder of your choice (names must be kept the same).
+Copy or symlink all sh scripts to `bin` directory of your choice (names must be kept the same).
+
+When using the systemd unit file, the choice of `bin` directory matters. See section [Systemd unit](#systemd-unit) for further instructions.
 
 ## Usage
 ```
