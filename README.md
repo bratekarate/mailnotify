@@ -1,5 +1,5 @@
 # mailnotify
-Fire notifications when new emails are found in your offline mailboxes. Needs a notification service such as `dunst` to be usable.
+Fire notifications when new emails appear in your offline mailboxes. Needs a notification service such as `dunst` to be usable.
 
 Dependencies: [`inotify-tools`](https://github.com/inotify-tools/inotify-tools)(`inotifywait`), [`libnotify`](https://github.com/GNOME/libnotify)(`notify-send`)
 
