@@ -45,7 +45,8 @@ if ! [ $# -eq 1 ] || echo "$1" | grep -q '^-'; then
     exit 1
 fi
 
-mkdir -p $HOME/.cache/mailnotify
+CACHE_PATH="$HOME/.cache/mailnotify"
+mkdir -p "$CACHE_PATH" 
 
 LISTEN_DIR="$1"
 
@@ -76,7 +77,7 @@ do
     echo "$(datetime_formatted) $LINE"; echo
 
     # Check in both `tmp` and `new` to work around race condition.
-    TMP_PATH="$HOME/.cache/$FILE"
+    TMP_PATH="$CACHE_PATH/$FILE"
     if test -f "$LINE"; then
         cp "$LINE" "$TMP_PATH"
     else 
