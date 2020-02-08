@@ -41,35 +41,37 @@ while [ $# -gt 0 ]; do
     [ $# -gt 0 ] && shift # shift only if more parameters exist
 done
 
-! [ $# -eq 1 ] || echo "$1" | grep '^-' && {
+if ! [ $# -eq 1 ] || echo "$1" | grep '^-'; then
     # Error if there is not exactly one parameter or if it starts with "-"
     malformed_args
     exit 1
-}
+fi
 
 LISTEN_DIR="$1"
 
 echo "$(datetime_formatted) Listening for new email files in $LISTEN_DIR"; echo
 
-# Store given dir names to exclude in positional parameter array
-eval "set -- "$EXCLUDE_INPUT""
-
-! [ $# -eq 0 ] && {
+if ! test -z "$EXCLUDE_INPUT" ; then
     echo 'Excluding subdirectories:'
     echo "$EXCLUDE_INPUT"; echo;
-}
+    EXCLUDE_INPUT="$(echo "$EXCLUDE_INPUT" | # escape typical characters 
+        sed 's/\(\[\|\]\|(\|)\|\\\|\^\|\$\|\.\||\|\?\|*\|+\)/\\\1/g')"
 
-# Format exclude pattern out of given dir names to exclude
-EXCLUDE="$(printf '%s)|(' "$@")"
-EXCLUDE="$(echo "${EXCLUDE%???}" |
-    sed 's/^/(/g; s/$/)/g; s/\(\w\)\()\)/\1\/.*\2/g')"
+    # Store given dir names to exclude in positional parameter array
+    eval "set -- "$EXCLUDE_INPUT""
+
+    # Format exclude pattern out of given dir names to exclude
+    EXCLUDE="$(printf '%s)|(' "$@")"
+    EXCLUDE="$(echo "${EXCLUDE%?}" |
+        sed 's/^/(/g; s/\()|\)/\/.*\1/g')"
+fi
 
 EXCLUDE_ROOT="$(echo "$LISTEN_DIR" |
     awk -F '/' '{ gsub("\\.", "\\.", $3); print $3 }')"
 
-while LINE="$(inotifywait -qr -e create \
---exclude "/$EXCLUDE_ROOT/.*/($EXCLUDE|(\.|new|cur))" \
---format %w%f "$LISTEN_DIR")"
+inotifywait -mrq -e create \
+    --exclude "/$EXCLUDE_ROOT/.*/($EXCLUDE(\.|new|cur))" \
+    --format '%w%f' "$LISTEN_DIR" | while read LINE
 do
     echo "$(datetime_formatted) $LINE"; echo
 
@@ -80,10 +82,10 @@ do
         MAIL_PATH="$(echo "$LINE" | sed 's/tmp/new/g')" 
     fi
 
-    test -f "$MAIL_PATH" || {
+    if ! test -f "$MAIL_PATH"; then
         echo "$WARNING_NO_MAIL_FILE"
-            continue
-        }
+        continue
+    fi
 
     parsemail "$MAIL_PATH" |
         while IFS="$(printf '\t')" read -r TO FROM SUBJECT PRIORITY; do
