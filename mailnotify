@@ -1,7 +1,5 @@
 #!/bin/sh
 
-WARNING_NO_MAIL_FILE="warning: could not find mail file after create event. Possibly newly downloaded mail that has been read already. Ignoring."
-
 print_usage() {
     echo 'Usage: mailnotify [OPTION]... [DIR_TO_WATCH]
 
@@ -38,14 +36,16 @@ while [ $# -gt 0 ]; do
         *)
             break
     esac
-    [ $# -gt 0 ] && shift # shift only if more parameters exist
+    [ $# -gt 0 ] && shift # Shift only if more parameters exist
 done
 
-if ! [ $# -eq 1 ] || echo "$1" | grep '^-'; then
+if ! [ $# -eq 1 ] || echo "$1" | grep -q '^-'; then
     # Error if there is not exactly one parameter or if it starts with "-"
     malformed_args
     exit 1
 fi
+
+mkdir -p $HOME/.cache/mailnotify
 
 LISTEN_DIR="$1"
 
@@ -57,10 +57,10 @@ if ! test -z "$EXCLUDE_INPUT" ; then
     EXCLUDE_INPUT="$(echo "$EXCLUDE_INPUT" | # escape typical characters 
         sed 's/\(\[\|\]\|(\|)\|\\\|\^\|\$\|\.\||\|\?\|*\|+\)/\\\1/g')"
 
-    # Store given dir names to exclude in positional parameter array
+    # Store given excludeable dir names in positional parameter array
     eval "set -- "$EXCLUDE_INPUT""
 
-    # Format exclude pattern out of given dir names to exclude
+    # Format exclude pattern out of given excludeable dir names
     EXCLUDE="$(printf '%s)|(' "$@")"
     EXCLUDE="$(echo "${EXCLUDE%?}" |
         sed 's/^/(/g; s/\()|\)/\/.*\1/g')"
@@ -70,26 +70,29 @@ EXCLUDE_ROOT="$(echo "$LISTEN_DIR" |
     awk -F '/' '{ gsub("\\.", "\\.", $3); print $3 }')"
 
 inotifywait -mrq -e create \
-    --exclude "/$EXCLUDE_ROOT/.*/($EXCLUDE(\.|new|cur))" \
-    --format '%w%f' "$LISTEN_DIR" | while read LINE
+    --exclude "/$EXCLUDE_ROOT/.*/($EXCLUDE(\.|new|cur)|(.*,S(\w|$)))" \
+    --format '%w%f %f' "$LISTEN_DIR" | while read LINE FILE
 do
     echo "$(datetime_formatted) $LINE"; echo
 
-    # Check in both `tmp` and `new`. In most cases, mail should be in `new`
+    # Check in both `tmp` and `new` to work around race condition.
+    TMP_PATH="$HOME/.cache/$FILE"
     if test -f "$LINE"; then
-        MAIL_PATH="$LINE"
+        cp "$LINE" "$TMP_PATH"
     else 
-        MAIL_PATH="$(echo "$LINE" | sed 's/tmp/new/g')" 
+        cp "$(echo "$LINE" | sed 's/tmp/new/g')" "$TMP_PATH"
     fi
 
-    if ! test -f "$MAIL_PATH"; then
-        echo "$WARNING_NO_MAIL_FILE"
+    if ! test -f "$TMP_PATH"; then
+        echo "Error: lost track of file unexpectedly: $TMP_PATH" >&2
         continue
     fi
 
-    parsemail "$MAIL_PATH" |
+    parsemail "$TMP_PATH" |
         while IFS="$(printf '\t')" read -r TO FROM SUBJECT PRIORITY; do
             notify-newmail "$TO" "$FROM" "$SUBJECT" "${PRIORITY:-3}"
         done
+
+    rm $TMP_PATH
 done
 
