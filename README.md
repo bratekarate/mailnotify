@@ -22,7 +22,7 @@ mailnotify [OPTION]... [DIR_TO_WATCH]
 
 ```
 
-Directory that should be watched for new emails may hold multiple email accounts. Specify one additional argument per subdirectory that should be excluded, e.g. for `Trash`, `Sent`, `Read Later`, `[Gmail]/Sent Items` etc. The `[` Character (and possibly more) must be escaped.
+Directory that should be watched for new emails may hold multiple email accounts. Specify one additional argument per subdirectory that should be excluded, e.g. for `Trash`, `Sent`, `Read Later`, `[Gmail]/Sent Items` etc.
 
 ## Example
 ```
@@ -30,7 +30,7 @@ mailnotify \
     -e Trash \ 
     -e Sent \
     -e 'Read Later' \
-    -e '\[Gmail\]/Sent Items' \
+    -e '[Gmail]/Sent Items' \
     ~/.local/share/mail
 ```
 
