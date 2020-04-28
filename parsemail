@@ -1,7 +1,6 @@
 #!/bin/sh
 
 # TODO: print usage
-# TODO: read from stdin for pipe usage
 
 # Usage: 
 # `parsemail [PATH_TO_MAIL_FILE]
@@ -11,7 +10,8 @@
 # awk commands: 
 # line 1: replace first colon by tab to split into 2 columns by first colon.
 # line 6: return tab-separated results
-sed 's/\t/ /g' "$1" |  # replace tabs with whitespaces first
+
+cat "${1--}" | sed 's/\t/ /g' |  # replace tabs with whitespaces first
        awk -v d="'" -F '\t' '
 { sub(/: /, "\t") }
 $1 == "To" { to = $2 }
