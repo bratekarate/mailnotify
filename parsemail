@@ -1,6 +1,8 @@
 #!/bin/sh
 
-# TODO: print usage
+# TODO:
+# - multiple 'to' addresses: parse only until first comma (first address)
+# - print usage
 
 # Usage: 
 # `parsemail [PATH_TO_MAIL_FILE]
@@ -12,7 +14,7 @@
 # line 6: return tab-separated results
 
 cat "${1--}" | sed 's/\t/ /g' |  # replace tabs with whitespaces first
-       awk -v d="'" -F '\t' '
+       awk -F '\t' '
 { sub(/: /, "\t") }
 $1 == "To" { to = $2 }
 $1 == "From" { from = $2 }
