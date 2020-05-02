@@ -15,6 +15,14 @@ datetime_formatted() {
     echo "[$(date +'%Y-%m-%d %H:%M:%S')]"
 }
 
+error_msg() {
+    msg "Error: $1" >&2
+}
+
+msg() {
+    echo "$(datetime_formatted) $1"
+}
+
 # Extract option arguments
 while [ $# -gt 0 ]; do
     case $1 in
@@ -36,7 +44,7 @@ done
 
 if ! [ $# -eq 1 ] || echo "$1" | grep -q '^-'; then
     # Error if there is not exactly one parameter or if it starts with "-"
-    echo "$0: error: malformed arguments." >&2; echo
+    echo "$0: Error: malformed arguments." >&2; echo
     print_usage
     exit 1
 fi
@@ -46,11 +54,10 @@ mkdir -p "$CACHE_PATH"
 
 LISTEN_DIR="$1"
 
-echo "$(datetime_formatted) Listening for new email files in $LISTEN_DIR"; echo
+msg "Listening for new email files in $LISTEN_DIR"
 
 if ! test -z "$EXCLUDE_INPUT" ; then
-    echo 'Excluding subdirectories:'
-    echo "$EXCLUDE_INPUT"; echo;
+    msg "Excluding subdirectories:$(printf "\n $EXCLUDE_INPUT\n")"
     EXCLUDE_INPUT="$(echo "$EXCLUDE_INPUT" | # escape typical characters 
         sed 's/\(\[\|\]\|(\|)\|\\\|\^\|\$\|\.\||\|\?\|*\|+\)/\\\1/g')"
 
@@ -70,20 +77,19 @@ inotifywait -mrq -e create \
     --exclude "/$EXCLUDE_ROOT/.*/($EXCLUDE(\.|new|cur)|(.*,S(\w|$)))" \
     --format '%w%f %f' "$LISTEN_DIR" | while read LINE FILE
 do
-    echo "$(datetime_formatted) $LINE"; echo
+    msg "$LINE"
 
     # Check in both `tmp` and `new` to work around race condition.
     TMP_PATH="$CACHE_PATH/$FILE"
-    if test -f "$LINE"; then
-        cp "$LINE" "$TMP_PATH"
-    else 
-        cp "$(echo "$LINE" | sed 's/tmp/new/g')" "$TMP_PATH"
-    fi
+    cp "$LINE" "$TMP_PATH" 2> /dev/null || {
+        msg "Mail file was already moved out of 'tmp' dir. Trying 'new' dir."
+        cp "$(echo "$LINE" | sed 's/tmp/new/g')" "$TMP_PATH"; 
+    }
 
-    if ! test -f "$TMP_PATH"; then
-        echo "Error: lost track of file unexpectedly: $TMP_PATH" >&2
-        continue
-    fi
+    test -f "$TMP_PATH" || {
+        error_msg "Lost track of file unexpectedly: $TMP_PATH"
+        continue;
+    }
 
     parsemail "$TMP_PATH" |
         while IFS="$(printf '\t')" read -r TO FROM SUBJECT PRIORITY; do
