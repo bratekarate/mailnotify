@@ -3,7 +3,7 @@ Fire notifications when new emails appear in your offline mailboxes. Needs a not
 
 Dependencies: [`inotify-tools`](https://github.com/inotify-tools/inotify-tools)(`inotifywait`), [`libnotify`](https://github.com/GNOME/libnotify)(`notify-send`)
 
-Should be POSIX compliant and work in most shells (tested in `dash`)
+Should be POSIX compliant and work in most shells (tested in `dash`, `bash` and `zsh`)
 
 ## Installation
 Copy or symlink all sh scripts to `bin` directory of your choice (names must be kept the same).
