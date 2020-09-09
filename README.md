@@ -43,6 +43,6 @@ Copy or symlink `mailnotify.service` to `~/.config/systemd/user/` and run `syste
 
 ## Limitations
 
-- Multiple recipients can not be included in the Notification. The first recipient will be picked. 
+- Multiple recipients can not be included in the notification. The first recipient will be used. 
 
 Ideas and/or PRs to address these limitations are always welcome.
