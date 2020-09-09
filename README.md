@@ -40,3 +40,9 @@ To run mailnotify as a systemd service, the executable `mailnotify-run` is used.
 First create a shell script named `mailnotify-run`. The unit file's `ExecStart` expects the script to sit at `~/.local/bin/mailnotify-run`, so change the path accordingly if necessary. Also, if the path to the binaries is not in the unit file's `Environment` option, the path must be added there as well.
 
 Copy or symlink `mailnotify.service` to `~/.config/systemd/user/` and run `systemctl --user enable mailnotify.service && systemctl --user start mailnotify.service`. 
+
+## Limitations
+
+- Multiple recipients can not be included in the Notification. The first recipient will be picked. 
+
+Ideas and/or PRs to address these limitations are always welcome.
