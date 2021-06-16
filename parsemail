@@ -4,21 +4,29 @@
 # - multiple 'to' addresses: parse only until first comma (first address)
 # - print usage
 
-# Usage: 
+# Usage:
 # `parsemail [PATH_TO_MAIL_FILE]
-# Returns tab-separated result in following order: 
+# Returns tab-separated result in following order:
 #   TO, FROM, SUBJECT, PRIORITY
 
-# awk commands: 
+# awk commands:
 # line 1: replace first colon by tab to split into 2 columns by first colon.
 # line 6: return tab-separated results
 
-cat "${1--}" | sed 's/\t/ /g' |  # replace tabs with whitespaces first
-       awk -F '\t' '
+DECODE_HEADER_PYTHON='import email.header; import sys; bytes, enc = email.header.decode_header("".join(sys.stdin.readlines()))[0]; print(bytes.decode(enc) if enc else bytes.replace("\n", ""))'
+
+cat "${1--}" | sed 's/\t/ /g' | # replace tabs with whitespaces first
+  awk -F '\t' '
 { sub(/: /, "\t") }
 $1 == "To" { to = $2 }
 $1 == "From" { from = $2 }
 $1 == "Subject" { subject = $2 }
 $1 == "X-Priority" { priority = $2 }
 END { print to "\t" from "\t" subject "\t" priority }
-'
+' | while IFS="$(printf '\t')" read -r TO FROM SUBJECT PRIORITY; do
+  printf "%s\t%s\t%s\t%s\n" \
+    "$TO" \
+    "$FROM" \
+    "$(printf "%s" "$SUBJECT" | python -c "$DECODE_HEADER_PYTHON")" \
+    "$PRIORITY"
+done
