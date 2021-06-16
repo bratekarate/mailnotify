@@ -13,7 +13,7 @@
 # line 1: replace first colon by tab to split into 2 columns by first colon.
 # line 6: return tab-separated results
 
-DECODE_HEADER_PYTHON='import email.header; import sys; bytes, enc = email.header.decode_header("".join(sys.stdin.readlines()))[0]; print(bytes.decode(enc) if enc else bytes.replace("\n", ""))'
+DECODE_HEADER_PYTHON='import email.header; import sys; bytes, enc = email.header.decode_header(sys.stdin.read())[0]; print(bytes.decode(enc) if enc else bytes.replace("\n", ""))'
 
 cat "${1--}" | sed 's/\t/ /g' | # replace tabs with whitespaces first
   awk -F '\t' '
