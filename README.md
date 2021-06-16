@@ -3,7 +3,7 @@ Fire notifications when new emails appear in your offline mailboxes. Needs a not
 
 Dependencies: [`inotify-tools`](https://github.com/inotify-tools/inotify-tools)(`inotifywait`), [`libnotify`](https://github.com/GNOME/libnotify)(`notify-send`)
 
-Should be POSIX compliant and work in most shells (tested in `dash`)
+Should be POSIX compliant and work in most shells (tested in `dash`, `bash` and `zsh`)
 
 ## Installation
 Copy or symlink all sh scripts to `bin` directory of your choice (names must be kept the same).
@@ -40,3 +40,10 @@ To run mailnotify as a systemd service, the executable `mailnotify-run` is used.
 First create a shell script named `mailnotify-run`. The unit file's `ExecStart` expects the script to sit at `~/.local/bin/mailnotify-run`, so change the path accordingly if necessary. Also, if the path to the binaries is not in the unit file's `Environment` option, the path must be added there as well.
 
 Copy or symlink `mailnotify.service` to `~/.config/systemd/user/` and run `systemctl --user enable mailnotify.service && systemctl --user start mailnotify.service`. 
+
+## Limitations
+
+- Multiple recipients can not be included in the notification. The string may be malformed in this case.
+- HTML content will be rendered as-is and may result in unreadable notifications.
+
+Ideas and/or PRs to address these limitations are always welcome.
