@@ -1,7 +1,10 @@
 # mailnotify
 Fire notifications when new emails appear in your offline mailboxes. Needs a notification service such as `dunst` to be usable.
 
-Dependencies: [`inotify-tools`](https://github.com/inotify-tools/inotify-tools)(`inotifywait`), [`libnotify`](https://github.com/GNOME/libnotify)(`notify-send`), python(module `email.header`)
+Dependencies:
+  - [`inotify-tools`](https://github.com/inotify-tools/inotify-tools) (`inotifywait`)
+  - [`libnotify`](https://github.com/GNOME/libnotify) (`notify-send`)
+  - python (module `email.header`)
 
 **TODO**: get rid of python dependency for decoding the email header. Seems to be non-trivial with awk or sed. Since python 3 is usually installed on most systems, it's not high on the priority list.
 
